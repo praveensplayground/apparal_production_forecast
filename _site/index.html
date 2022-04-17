@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Forecasting Production Quantities</title>
+
+<script src="site_libs/header-attrs-2.6/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Apperal Production Forecasting</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Forecasting Production Quantities</h1>
+
+</div>
+
+
+<div id="executive-summary" class="section level1">
+<h1>Executive Summary</h1>
+<p>The goal of this study is to predict the production quantities for an apperal manufacturer. We have run a multinomial OLS regression, random forest model and a gradient boosting model (GBM) in order to predict the production quantities. We have done data cleaning, visualizations feature engineering, scaling in order to create an appropriate dataset for model training. We used root mean squared error (RMSE) of the test set in order to decide the best model. The GBM model provides the least RMSE thus proving to be the most appropriate model.</p>
+<div id="introduction" class="section level2">
+<h2>Introduction:</h2>
+<p>The goal is to forecast the production. We are given two data sources which are the “plan” folder and the “production quantities” folder. There is no specified forecasting horizon specified therefore it is not necessary to forecast forward. As the problem suggests, this is a supervised learning problem as we will likely have labeled datasets for us to learn patterns and forecast (Alpaydin, 2020). This is also likely going to be a regression problem. The Y variable is going to be a continuous variable and not a categorical variable. We have been given the definition of few X variables but we have not been specified a Y variable.</p>
+<p><br></p>
+</div>
+</div>
+<div id="a.-properties-of-data" class="section level1">
+<h1>A. Properties of data</h1>
+<div id="a.1.-production-data" class="section level3">
+<h3>A.1. Production data</h3>
+<p>We have already extracted the datasets into our relevant folder. once extracted, we can observe its characteristics.</p>
+<pre class="r"><code>setwd(&quot;C:\\praveen\\mba help\\DataSet-2021\\Production Quantities&quot;)
+files&lt;-list.files()
+
+# number of files to be read
+length(files)</code></pre>
+<pre><code>## [1] 119</code></pre>
+<pre class="r"><code># What do the names look like?
+print(files[1:20])</code></pre>
+<pre><code>##  [1] &quot;~$PR 05.01.2018 - D051.xlsx&quot; &quot;PR 01.02.2018 - D051.xlsx&quot;   &quot;PR 01.03.2018 - D051.xlsx&quot;  
+##  [4] &quot;PR 01.04.2018 - D051.xlsx&quot;   &quot;PR 01.05.2018 - D051.xlsx&quot;   &quot;PR 01.06.2018 - D051.xlsx&quot;  
+##  [7] &quot;PR 01.08.2018 - D051.xlsx&quot;   &quot;PR 01.09.2018 - D051.xlsx&quot;   &quot;PR 01.10.2018 - D051.xlsx&quot;  
+## [10] &quot;PR 01.11.2018 - D051.xlsx&quot;   &quot;PR 01.12.2018 - D051.xlsx&quot;   &quot;PR 01.13.2018 - D051.xlsx&quot;  
+## [13] &quot;PR 01.15.2018 - D051.xlsx&quot;   &quot;PR 01.16.2018 - D051.xlsx&quot;   &quot;PR 01.17.2018 - D051.xlsx&quot;  
+## [16] &quot;PR 01.18.2018 - D051.xlsx&quot;   &quot;PR 01.19.2018 - D051.xlsx&quot;   &quot;PR 01.20.2018 - D051.xlsx&quot;  
+## [19] &quot;PR 01.22.2018 - D051.xlsx&quot;   &quot;PR 01.23.2018 - D051.xlsx&quot;</code></pre>
+<pre class="r"><code># information about a file. this generally provides the file name, size, and dates modified. lets look at the first 3 files and their information
+
+file.info(files[3])</code></pre>
+<pre><code>##                            size isdir mode               mtime               ctime               atime exe
+## PR 01.03.2018 - D051.xlsx 39186 FALSE  666 2021-09-04 22:46:21 2018-05-07 18:14:04 2022-04-17 20:38:05  no</code></pre>
+<pre class="r"><code>file1&lt;-read_xlsx(files[3],skip=1)
+
+# what does the actual file look like? Lets open a file and see.
+head(file1)</code></pre>
+<pre><code>## # A tibble: 6 x 25
+##   Date                Section PE    `Work Center` Module `Planned/Projec~ `Present Employ~ `Absent Employe~
+##   &lt;dttm&gt;              &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;         &lt;chr&gt;             &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 2018-01-03 00:00:00 PDC SE~ ?     0252-A        0252-A                0                9                1
+## 2 2018-01-03 00:00:00 PDC SE~ ?     0252-A        0252-A                0                0                0
+## 3 2018-01-03 00:00:00 PDC SE~ ?     0252-A        0252-A                0                0                0
+## 4 2018-01-03 00:00:00 PDC SE~ ?     0253-A        0253-A                0                5                1
+## 5 2018-01-03 00:00:00 PDC SE~ ?     0253-A        0253-A                0                0                0
+## 6 2018-01-03 00:00:00 PDC SE~ ?     0311-A        0311-A                0               14                2
+## # ... with 17 more variables: `No Of Hours Per Day` &lt;dbl&gt;, `Worked Hours` &lt;dbl&gt;, `Daily Down Time Hours` &lt;dbl&gt;, `Impacted
+## #   DownTime Hours` &lt;dbl&gt;, `Daily Performance` &lt;dbl&gt;, Customer &lt;chr&gt;, `Style Code` &lt;chr&gt;, `Style Description` &lt;chr&gt;,
+## #   SO &lt;chr&gt;, LI &lt;dbl&gt;, `FG Reference` &lt;chr&gt;, `SO/LI Worked Hours` &lt;dbl&gt;, Efficiency &lt;dbl&gt;, `Time Slot` &lt;lgl&gt;,
+## #   Total &lt;dbl&gt;, SMV &lt;dbl&gt;, `Standard Hours` &lt;dbl&gt;</code></pre>
+<pre class="r"><code>#examine the structure of a dataset
+str(file1)</code></pre>
+<pre><code>## tibble [122 x 25] (S3: tbl_df/tbl/data.frame)
+##  $ Date                        : POSIXct[1:122], format: &quot;2018-01-03&quot; &quot;2018-01-03&quot; &quot;2018-01-03&quot; &quot;2018-01-03&quot; ...
+##  $ Section                     : chr [1:122] &quot;PDC SECTION&quot; &quot;PDC SECTION&quot; &quot;PDC SECTION&quot; &quot;PDC SECTION&quot; ...
+##  $ PE                          : chr [1:122] &quot;?&quot; &quot;?&quot; &quot;?&quot; &quot;?&quot; ...
+##  $ Work Center                 : chr [1:122] &quot;0252-A&quot; &quot;0252-A&quot; &quot;0252-A&quot; &quot;0253-A&quot; ...
+##  $ Module                      : chr [1:122] &quot;0252-A&quot; &quot;0252-A&quot; &quot;0252-A&quot; &quot;0253-A&quot; ...
+##  $ Planned/Projected Efficiency: num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ Present Employees           : num [1:122] 9 0 0 5 0 14 19 21 0 18 ...
+##  $ Absent Employees            : num [1:122] 1 0 0 1 0 2 0 4 0 1 ...
+##  $ No Of Hours Per Day         : num [1:122] 11 0 0 11 0 11 11 11 0 11 ...
+##  $ Worked Hours                : num [1:122] 99 0 0 55 0 ...
+##  $ Daily Down Time Hours       : num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ Impacted DownTime Hours     : num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ Daily Performance           : num [1:122] 29.4 29.4 29.4 0 0 ...
+##  $ Customer                    : chr [1:122] &quot;Amante&quot; &quot;Amante&quot; &quot;Amante&quot; &quot;Shade &amp; Shore&quot; ...
+##  $ Style Code                  : chr [1:122] &quot;DEV002-T&quot; &quot;DEV002-T&quot; &quot;DEV002-T&quot; &quot;SHB0179&quot; ...
+##  $ Style Description           : chr [1:122] &quot;DEV002-T&quot; &quot;DEV002-T&quot; &quot;DEV002-T&quot; &quot;PERFECT SUNRISE BOTTOM&quot; ...
+##  $ SO                          : chr [1:122] &quot;D000069836&quot; &quot;D000069837&quot; &quot;D000069837&quot; &quot;2000015636&quot; ...
+##  $ LI                          : num [1:122] 40 50 60 70 170 40 50 10 20 10 ...
+##  $ FG Reference                : chr [1:122] &quot;FDEV002-T-GLB&quot; &quot;FDEV002-T-GLB&quot; &quot;FDEV002-T-MIN&quot; &quot;FSHB0179-206-ZR&quot; ...
+##  $ SO/LI Worked Hours          : num [1:122] 59.1 20 20 27.5 27.5 ...
+##  $ Efficiency                  : num [1:122] 29.4 29.4 29.4 0 0 ...
+##  $ Time Slot                   : logi [1:122] NA NA NA NA NA NA ...
+##  $ Total                       : num [1:122] 0 0 0 0 0 0 0 0 0 0 ...
+##  $ SMV                         : num [1:122] 13.5 13.5 13.5 0 0 ...
+##  $ Standard Hours              : num [1:122] 0 0 0 0 0 0 0 0 0 0 ...</code></pre>
+<p>What we have done is we have listed all the files in the folder. We wanted to see what the data names look like. So we have printed the dataset names. Then we have read a random excel file in the folder. We have printed some of the production datasets. There are few insights to be gained.</p>
+<ol style="list-style-type: decimal">
+<li>There As the names suggest, they refer to the production data for different days.</li>
+<li>They are also in excel format. Therefore we will need a special package to read the data.</li>
+<li>Also, There are multiple datasets to work with. There are 118 files and ideally they have to be read and concatenated.</li>
+<li>data is not in tidy format. The data starts from the 3rd row. every time we read a dataset we have to skip the first two rows.</li>
+</ol>
+<p>These insights suggest that there will be extensive work on preparing the datasets for analysis. Lets look at what the planning datasets look like. Once we look at the production dataset, we dont come across any field on the production. This essentially renders the production dataset useless for our analysis as it does not contain a Y variable.</p>
+<p><br> <br></p>
+<pre class="r"><code>names(file1)</code></pre>
+<pre><code>##  [1] &quot;Date&quot;                         &quot;Section&quot;                      &quot;PE&quot;                          
+##  [4] &quot;Work Center&quot;                  &quot;Module&quot;                       &quot;Planned/Projected Efficiency&quot;
+##  [7] &quot;Present Employees&quot;            &quot;Absent Employees&quot;             &quot;No Of Hours Per Day&quot;         
+## [10] &quot;Worked Hours&quot;                 &quot;Daily Down Time Hours&quot;        &quot;Impacted DownTime Hours&quot;     
+## [13] &quot;Daily Performance&quot;            &quot;Customer&quot;                     &quot;Style Code&quot;                  
+## [16] &quot;Style Description&quot;            &quot;SO&quot;                           &quot;LI&quot;                          
+## [19] &quot;FG Reference&quot;                 &quot;SO/LI Worked Hours&quot;           &quot;Efficiency&quot;                  
+## [22] &quot;Time Slot&quot;                    &quot;Total&quot;                        &quot;SMV&quot;                         
+## [25] &quot;Standard Hours&quot;</code></pre>
+<pre class="r"><code># the production dataset does not contain any column to be used as the Y variable.</code></pre>
+<p><br></p>
+</div>
+<div id="a.2.-planning-data" class="section level3">
+<h3>A.2. Planning data</h3>
+<p>We will print to see what the planning data look like too. Again we will examine how many planning data we have, what the file properties look like and what a typical dataset looks like</p>
+<p><br></p>
+<pre class="r"><code>setwd(&quot;C:\\praveen\\mba help\\DataSet-2021\\Plan&quot;)
+files&lt;-list.files()
+
+# number of files to be read
+length(files)</code></pre>
+<pre><code>## [1] 49</code></pre>
+<pre class="r"><code># What do the names look like?
+print(files[1:20])</code></pre>
+<pre><code>##  [1] &quot;~$LC Sec 1 - 01.02 - 01.12.xlsx&quot; &quot;LC Sec 1 - 01.02 - 01.12.xlsx&quot;   &quot;LC Sec 1 - 01.15 - 01.26.xlsx&quot;  
+##  [4] &quot;LC Sec 1 - 01.29 - 02.09.xlsx&quot;   &quot;LC Sec 1 - 02.12 - 02.24.xlsx&quot;   &quot;LC Sec 1 - 02.26 - 03.10.xlsx&quot;  
+##  [7] &quot;LC Sec 1 - 03.12 - 03.24.xlsx&quot;   &quot;LC Sec 1 - 03.26 - 03.30.xlsx&quot;   &quot;LC Sec 1 - 04.02 - 04.27.xlsx&quot;  
+## [10] &quot;LC Sec 1 - 05.01 - 05.12.xlsx&quot;   &quot;LC Sec 1 - 05.14 - 05.25.xlsx&quot;   &quot;LC Sec 1 - 05.30 - 06.13.xlsx&quot;  
+## [13] &quot;LC Sec 1 - 06.18 - 06.29.xlsx&quot;   &quot;LC Sec 2 - 01.02 - 01.12.xlsx&quot;   &quot;LC Sec 2 - 01.15 - 01.26.xlsx&quot;  
+## [16] &quot;LC Sec 2 - 01.29 - 02.09.xlsx&quot;   &quot;LC Sec 2 - 02.12 - 02.24.xlsx&quot;   &quot;LC Sec 2 - 02.26 - 03.10.xlsx&quot;  
+## [19] &quot;LC Sec 2 - 03.12 - 03.24.xlsx&quot;   &quot;LC Sec 2 - 03.26 - 03.30.xlsx&quot;</code></pre>
+<pre class="r"><code># information about a file. this generally provides the file name, size, and dates modified.
+
+file.info(files[3])</code></pre>
+<pre><code>##                                size isdir mode               mtime               ctime               atime exe
+## LC Sec 1 - 01.15 - 01.26.xlsx 75134 FALSE  666 2021-09-04 22:46:22 2021-06-07 18:41:30 2022-04-17 20:38:06  no</code></pre>
+<pre class="r"><code>file1&lt;-read_xlsx(files[3],skip=2)
+
+# what does the actual file look like?
+head(file1)#%&gt;%datatable()</code></pre>
+<pre><code>## # A tibble: 6 x 20
+##   Module Material `Customer No` Description `Customer Dept.` Gender `S/O` `L/I` `Order No.` `Order Qty.`  Emp.   SMV
+##   &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;         &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;  &lt;chr&gt; &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    50  8000403815         2982    19  14.2
+## 2 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    50  8000403815         2982    19  14.2
+## 3 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    50  8000403815         2982    19  14.2
+## 4 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    50  8000403815         2982    19  14.2
+## 5 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    50  8000403815         2982    19  14.2
+## 6 0005-A 7000114~ 100255        AE STRAPPY~ Q9/AERIE- SWIM   FL     D000~    30  8000345609         1534    19  14.2
+## # ... with 8 more variables: Date &lt;dttm&gt;, `Eff. %` &lt;dbl&gt;, Qty. &lt;dbl&gt;, `Cum Qty.` &lt;dbl&gt;, `Standard Hours.` &lt;dbl&gt;,
+## #   `Cum.Standard Hours.` &lt;dbl&gt;, `Work Hours.` &lt;dbl&gt;, `Cum.Work Hours.` &lt;dbl&gt;</code></pre>
+<pre class="r"><code>#examine the structure of a dataset
+str(file1)</code></pre>
+<pre><code>## tibble [465 x 20] (S3: tbl_df/tbl/data.frame)
+##  $ Module             : chr [1:465] &quot;0005-A&quot; &quot;0005-A&quot; &quot;0005-A&quot; &quot;0005-A&quot; ...
+##  $ Material           : chr [1:465] &quot;7000114971&quot; &quot;7000114971&quot; &quot;7000114971&quot; &quot;7000114971&quot; ...
+##  $ Customer No        : chr [1:465] &quot;100255&quot; &quot;100255&quot; &quot;100255&quot; &quot;100255&quot; ...
+##  $ Description        : chr [1:465] &quot;AE STRAPPY BACK ONE PC BASIC SD SS18&quot; &quot;AE STRAPPY BACK ONE PC BASIC SD SS18&quot; &quot;AE STRAPPY BACK ONE PC BASIC SD SS18&quot; &quot;AE STRAPPY BACK ONE PC BASIC SD SS18&quot; ...
+##  $ Customer Dept.     : chr [1:465] &quot;Q9/AERIE- SWIM&quot; &quot;Q9/AERIE- SWIM&quot; &quot;Q9/AERIE- SWIM&quot; &quot;Q9/AERIE- SWIM&quot; ...
+##  $ Gender             : chr [1:465] &quot;FL&quot; &quot;FL&quot; &quot;FL&quot; &quot;FL&quot; ...
+##  $ S/O                : chr [1:465] &quot;D000072016&quot; &quot;D000072016&quot; &quot;D000072016&quot; &quot;D000072016&quot; ...
+##  $ L/I                : num [1:465] 50 50 50 50 50 30 30 30 60 60 ...
+##  $ Order No.          : num [1:465] 8e+09 8e+09 8e+09 8e+09 8e+09 ...
+##  $ Order Qty.         : num [1:465] 2982 2982 2982 2982 2982 ...
+##  $ Emp.               : num [1:465] 19 19 19 19 19 19 19 19 19 19 ...
+##  $ SMV                : num [1:465] 14.2 14.2 14.2 14.2 14.2 ...
+##  $ Date               : POSIXct[1:465], format: &quot;2018-01-15&quot; &quot;2018-01-16&quot; &quot;2018-01-17&quot; &quot;2018-01-18&quot; ...
+##  $ Eff. %             : num [1:465] 78 78 78 78 78 78 78 78 78 78 ...
+##  $ Qty.               : num [1:465] 687 687 562 562 214 ...
+##  $ Cum Qty.           : num [1:465] 957 1644 2206 2768 2982 ...
+##  $ Standard Hours.    : num [1:465] 163 163 133.4 133.4 50.7 ...
+##  $ Cum.Standard Hours.: num [1:465] 227 390 524 657 708 ...
+##  $ Work Hours.        : num [1:465] 209 209 171 171 65 ...
+##  $ Cum.Work Hours.    : num [1:465] 291 500 671 842 907 ...</code></pre>
+<p>A very similar characteristics are observed in the planning dataset too. The datasets are in excel format as opposed to .csv format. The datasets are not in a tidy format. In this case the first two rows of the dataset are redundent. There are 49 files in the plan folder. Although the file name refers to the day of the production plan, the Date column also conveniently refers to the same information.</p>
+</div>
+<div id="a3.-finding-the-target-variable" class="section level3">
+<h3>A3. Finding the target variable</h3>
+<p>Finding the target variable was very difficult here. As it is mentioned in the assignment, we did not find any column named “Production”. This was a big issue in order to solve our problem at hand. However the planning data contains a column called Qty which could refer to the actual quantities produced. Not specifically knowing the field meanings is a big challenge in this study. Therefore we decided to use planning data in order to forecast the quantities.</p>
+<p><br></p>
+</div>
+</div>
+<div id="b.-reading-data" class="section level1">
+<h1>B. Reading data</h1>
+<p>We first need to load the data into R and convert into a R recognizable format. This turned out to be a challenging task for a few reasons.</p>
+<ol style="list-style-type: decimal">
+<li>There are multiple files. Cannot read them in a single code.</li>
+<li>some files are corrupted and cannot read. we have to remove the corrupted files</li>
+<li>The data is not in tidy format. the first row does not contain any information</li>
+<li>The data start apperaing in different rows. this prevents us from consistently reading all the files</li>
+</ol>
+<p>First we will remove the redundant datasets. There are some datasets that are the size of 0. We will read only the datasets that have a size of over 0 KB. For this, we use a loop and in the loop we identify the observations that are over 0 KB.</p>
+<pre class="r"><code>setwd(&quot;C:\\praveen\\mba help\\DataSet-2021\\Plan&quot;)
+slist&lt;-list()
+
+files&lt;-list.files(pattern=&quot;.xlsx&quot;)
+
+x&lt;-1
+
+for (i in 1:length(files)){
+  
+  tk&lt;-files[i]%&gt;%data.frame()
+  tk$size&lt;-file.info(files[i])[[1]]
+  
+  
+  slist[[x]]&lt;-tk
+  x&lt;-x+1
+}
+
+# remove datasets with size = 0
+hh&lt;-bind_rows(slist)%&gt;%
+  filter(size&gt;0)
+
+
+# read only the files with &gt;0 size
+
+
+tt &lt;- function(x) {
+  l&lt;-read_xlsx(x,sheet=1,skip=0)
+  l&lt;-l[1:(nrow(l)-1),]%&gt;%data.frame()
+  
+  return(l)
+}
+
+files2&lt;-hh$.[c(1:7,9:29,31:35)]
+
+ddf&lt;-lapply(files2,tt)</code></pre>
+<p><br></p>
+</div>
+<div id="e.-merging-datasets" class="section level1">
+<h1>E. Merging datasets</h1>
+<p>Reading and merging the files is not something that can be done sequentially in a loop as each dataset is different. This is a big challenge. After some trial and error, we decide to read the data in a loop. There are 3 datasets that are red outside the loop. All the datasets will be binded by rows to create the master table.</p>
+<pre class="r"><code>col_names&lt;-c(&quot;Module&quot;,&quot;Material&quot;,&quot;Customer_No&quot;,&quot;Description&quot;,&quot;Customer_Dept.&quot;,&quot;Gender&quot;,&quot;s_o&quot;,&quot;l_i&quot;,&quot;Order_No.&quot;,&quot;Order_Qty.&quot;,&quot;Emp.&quot;,&quot;SMV&quot;,&quot;Date&quot;,&quot;Eff_%&quot;,&quot;Qty.&quot;)
+
+
+list2&lt;-list()
+x&lt;-1
+
+for (i in 1:length(ddf)){
+  
+  df1&lt;-ddf[[i]]%&gt;%filter_at(1, all_vars(. != &#39;NA&#39;))
+  df1&lt;-df1[,1:15]
+  names(df1)&lt;-col_names
+  df1&lt;-df1%&gt;%filter_at(1, all_vars(. != &#39;Module&#39;))
+  list2[[x]]&lt;-df1
+  x&lt;-x+1
+  
+}
+
+setwd(&quot;C:\\praveen\\mba help\\DataSet-2021\\Plan&quot;)
+p1&lt;-(read_xlsx(hh$.[8],sheet=1,skip=0))[,1:15]
+names(p1)&lt;-col_names
+p2&lt;-(read_xlsx(hh$.[30],sheet=1,skip=0))[,1:15]
+names(p2)&lt;-col_names
+p3&lt;-(read_xlsx(hh$.[36],sheet=1,skip=0))[,1:15]
+names(p3)&lt;-col_names
+
+combined&lt;-bind_rows(list2)
+combined$Date&lt;-as.Date(as.numeric(combined$Date), origin = &quot;1900-01-01&quot;)
+
+full_df&lt;-rbind(p1,p2,p3,combined)
+
+
+print(paste0(&quot;The final merged dataset has &quot;, nrow(full_df),&quot; rows and &quot;, ncol(full_df),&quot; columns&quot; ))</code></pre>
+<pre><code>## [1] &quot;The final merged dataset has 13889 rows and 15 columns&quot;</code></pre>
+<p><br></p>
+</div>
+<div id="c.-data-cleaning" class="section level1">
+<h1>C. Data Cleaning</h1>
+<div id="c.1.-identifying-and-converting-the-variables-into-character-variables" class="section level3">
+<h3>C.1. Identifying and converting the variables into character variables</h3>
+<p><br></p>
+<p>One advantage with R is that we do not need to one-hot-encode the character variables for us in order to run a model with dummy variables. However, the variables should be in character/factor format. So we change the columns accordingly.</p>
+<pre class="r"><code>columns_c&lt;-c(&quot;Module&quot;,&quot;Material&quot;,&quot;Customer_No&quot;,&quot;Description&quot;,&quot;Customer_Dept.&quot;,&quot;Gender&quot;,&quot;s_o&quot;,&quot;l_i&quot;,&quot;Order_No.&quot;)
+
+full_df[columns_c]&lt;-sapply(full_df[columns_c], function(x)as.factor(as.character(x)))</code></pre>
+</div>
+<div id="c.2.-identifying-and-converting-the-variables-into-numeric-variables" class="section level3">
+<h3>C.2. Identifying and converting the variables into numeric variables</h3>
+<p>We have observed that some variables that are needed to be in numeric format are actually in character format. For example, our Y variable (the target variable ) is currently in character format. Therefore we convert the variables that are supposed to be in numeric to numeric.</p>
+<pre class="r"><code>columns_n&lt;-c(&quot;SMV&quot;,&quot;Order_Qty.&quot;,&quot;Eff_%&quot;,&quot;Qty.&quot;)
+
+full_df[columns_n]&lt;-sapply(full_df[columns_n], function(x)as.numeric(as.character(x)))</code></pre>
+</div>
+<div id="c.3.treating-na-values" class="section level3">
+<h3>C.3.Treating NA values</h3>
+<p>We will first examine how many missing values are there in each row.</p>
+<pre class="r"><code># str(full_df)
+
+# How many NA values in each row
+
+sapply(full_df, function(x)sum(is.na(x)))%&gt;%data.frame()%&gt;%mutate(col_names = col_names)%&gt;%
+ggplot(aes(x=reorder(col_names,-.),.))+
+  geom_bar(stat = &quot;identity&quot;, fill = &quot;#69b3a2&quot;,color=&quot;black&quot;)+
+  labs(title = &quot;Visual 1: The Number of NA Values in Different Columns&quot;,
+       x = &quot;Column names&quot;)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme(text=element_text(family = &quot;AvantGarde&quot;, color = &quot;grey20&quot;, size=12))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>It looks like certain customers have a lot of null values. These are important to be treated as they can create misclassifications (Alarsan 2019). It would have been better if we are able to get a good business sense about why these observations have a null value. For example, if there are items that are considered unisex and therefore the column is blank, we could have filled the NA numbers appropriately. However, we currently do not have that luxuy. There are null values in some of the key columns such as sales order and line item too.</p>
+<p>It appears that there are quite a number of null values. Gender, S_O and L_I have equal number of null values indicating that there could be some pattern to the null values.At the same time Gender, S_O and L_I are very important categorical columns for our model. The rows with null values are arround 12% of the total number of observations. Therefore we decide to drop them.</p>
+<pre class="r"><code>full&lt;-full_df%&gt;%
+  filter(Gender !=&quot;NA&quot;)
+
+sapply(full, function(x)sum(is.na(x)))</code></pre>
+<pre><code>##         Module       Material    Customer_No    Description Customer_Dept.         Gender            s_o            l_i 
+##              0              0              0              0              0              0              0              0 
+##      Order_No.     Order_Qty.           Emp.            SMV           Date          Eff_%           Qty. 
+##              0              0              0              0              0              0             13</code></pre>
+</div>
+<div id="treat-missing-values-for-numeric-values-with-mean-and-fill-some-factor-variables" class="section level2">
+<h2>treat missing values for numeric values with mean and fill some factor variables</h2>
+<p>Now there are only 13 observations that are NA. These appear in the Qty column which is our Y variable. Out of over 12,000 observations this is a negligible number. so we can substitute it with the mean of the column.</p>
+<pre class="r"><code>full$Qty.&lt;-ifelse(is.na(full$Qty.),mean(full$Qty.,na.rm = T),full$Qty.)
+
+
+sapply(full, function(x)sum(is.na(x)))</code></pre>
+<pre><code>##         Module       Material    Customer_No    Description Customer_Dept.         Gender            s_o            l_i 
+##              0              0              0              0              0              0              0              0 
+##      Order_No.     Order_Qty.           Emp.            SMV           Date          Eff_%           Qty. 
+##              0              0              0              0              0              0              0</code></pre>
+<p>Now we can see that there are no records with NA values.</p>
+</div>
+</div>
+<div id="d.-normalization-and-scaling" class="section level1">
+<h1>D. Normalization and scaling</h1>
+<div id="d.1-normalizing-the-y-variable" class="section level3">
+<h3>D.1 Normalizing the Y variable</h3>
+<p>Normalization may be required in the data if the data is required if the data is highly skewed and include a number of outliers (Al Shalabi et al.,2006). Whe outliers are identified the best way to deal with them is to get the business knowledge about how they happened. However, that luxury is not there for us. we can examine the outliers and treat them statistically if required.</p>
+<pre class="r"><code>ggplot(full, aes(Qty.))+
+  geom_density()+
+  ggtitle(&quot;Visual 2: The Distribution of the Qty. column&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>ggplot(full, aes(Gender,Qty.))+
+  geom_boxplot(alpha=0.0)+
+  geom_jitter(alpha=0.2, fill=&quot;#69b3a2&quot;)+
+  ggtitle(&quot;Visual 3: Boxplots by the Gender&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>Here we can see that there are a number of genders recorded. It is weird to come across this number of gernders. However, we are not able to exactly identify what each abbreviations stand for. We also can see that the density chart of the Qty. column is extremely skewed and contains a number of outliers that we can hardly even see a distribution. The same is seen when we plot the box plots by gender. Running a model on untreated data like this would result in biased measures. Also, depending on the algorithm we choose, the model will be highly affected by outliers which is something data scientists try to avoid at all costs. In order to treat this extreme condition, we will normalize the Y variable in 2 ways.</p>
+<ol style="list-style-type: decimal">
+<li>any observations over 99.9% percentile will be assigned to the 99.9th percentile</li>
+<li>Any observations less than 0.1% percentile will be assigned to the 0.1 percentile</li>
+<li>We will also convert the variable into log and check the result.</li>
+</ol>
+<p><br></p>
+<pre class="r"><code>sum(ifelse(full$Qty.&gt;quantile(full$Qty.,0.999),1,0))</code></pre>
+<pre><code>## [1] 13</code></pre>
+<pre class="r"><code># we have 13 observations at 99.9 percentile
+
+full$Qty.&lt;-ifelse(full$Qty.&gt;quantile(full$Qty.,0.999),quantile(full$Qty.,0.995),full$Qty.)
+full$Qty.&lt;-ifelse(full$Qty.&lt;quantile(full$Qty.,0.001),quantile(full$Qty.,0.001),full$Qty.)
+full$log_qty&lt;-log(ifelse(full$Qty.==0,0.1,full$Qty.))</code></pre>
+<pre class="r"><code>ggplot(full, aes(log_qty))+
+  geom_density(fill=&quot;#69b3a2&quot;, alpha=0.8)+
+  ggtitle(&quot;Visual 4: The Distribution of the Quantity after Treatment&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+<p>Converting the variable into log largely has solved our problem. The distribution is not entirely a normally distributed one. But a Y variable like this is more parsimonious for running a model. We can see that compared to the graph we saw earlier, this is a much better representation of our Y variable. Since the Qty column actually has 0 values, we will first convert the 0 values to 0.1 in order to be compatible to convert to log.</p>
+<p><br></p>
+<pre class="r"><code>ggplot(full, aes(Gender,log(Qty.)))+
+  geom_boxplot(alpha=0.0)+
+  geom_jitter(alpha=0.2, fill=&quot;#69b3a2&quot;)+
+  ggtitle(&quot;Visual 5: Boxplots by the Gender post Treatment&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>The above figure is a boxplot by the Gender. I have plotted the individual data points converted to log placed on top. This shows that now the data distribution follows a very normal pattern. It also shows how the data is allocated for different genders.</p>
+<p><br></p>
+</div>
+<div id="removing-outliers-of-numeric-variables" class="section level3">
+<h3>Removing outliers of numeric variables</h3>
+<p>We will treat the outliers by getting the extreme 2% of data back to 98th percentile.</p>
+<pre class="r"><code>full$Qty.&lt;-ifelse(full$Qty.&gt;quantile(full$Qty.,0.98),quantile(full$Qty.,0.98),full$Qty.)
+full$`Eff_%` &lt;- ifelse(full$`Eff_%`&gt;quantile(full$`Eff_%`,0.98),quantile(full$`Eff_%`,0.98),full$`Eff_%`)
+full$Order_Qty.&lt;-ifelse(full$Order_Qty.&gt;quantile(full$Order_Qty.,0.98),quantile(full$Order_Qty.,0.98),full$Order_Qty.)
+
+# create the melted dataset again
+tidy&lt;-full[c(&quot;SMV&quot;,&quot;Order_Qty.&quot;,&quot;Eff_%&quot;,&quot;Qty.&quot;)]%&gt;%gather(&quot;numeric_col&quot;,&quot;value&quot;,1:4)
+
+# visualize the numeric variables after treatment
+
+ggplot(tidy, aes(x=value)) + 
+  geom_density(fill=&quot;#BF87B3&quot;, alpha=0.8)+ 
+  facet_wrap(numeric_col ~ ., scales=&quot;free&quot;)+
+  labs(title = &quot;Visualisation : &quot;,
+       subtitle = &quot;Distribution of the numeric variables after outlier treatment&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p><br></p>
+</div>
+<div id="d.2.-examining-the-number-of-levels-in-each-column" class="section level3">
+<h3>D.2. Examining the number of levels in each column</h3>
+<p>we need to decide what columns to use for our model and which columns qualify as good categorical variables. Categorical variables with too many levels will create a dimentiality problem (Seger 2018). lets examine the number of levels in each categorical column.</p>
+<pre class="r"><code># length(unique(full$Module))
+
+
+sapply(full[columns_c], function(x)length(unique(x)))%&gt;%data.frame()%&gt;%mutate(col_names = columns_c)%&gt;%
+  ggplot(aes(x=reorder(col_names,-.),., label = .))+
+  geom_bar(stat = &quot;identity&quot;, fill = &quot;#69b3a2&quot;,color=&quot;black&quot;)+
+  labs(title = &quot;Visual 6: The Number of levels in the Categorical Columns&quot;,
+       x = &quot;Column names&quot;)+
+  geom_text(size = 3, position = position_dodge(width = 1),vjust = -0.5, size = 2)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>This shows that if we were to create dummy variables to all the categorical columns, we will be stuck in a dimentionality problem. However, this says that for the period considered, we have processed 3337 different orders, used 2561 different materials and so on. The above chart gives us a number of insights in that regard. We will also look at the categorical variables that have a high number of levels and the number count of them.</p>
+</div>
+<div id="feature-engineering-patterns" class="section level2">
+<h2>Feature engineering / patterns /</h2>
+<p>The Description column has a very high number of unique entries. The column cannot be used to run a model in its raw form. In order to be able to use the column, we need to transform the column into a smaller dimention. Lets look at the description and what sort of descriptions are there in the top 20 descriptions. We can decide if we want to further do a feature engineering on our data based on the results.</p>
+<pre class="r"><code># length(unique(full$Module))
+
+
+full%&gt;%
+  group_by(Description)%&gt;%
+  summarize(counts=n())%&gt;%
+  arrange(desc(counts))%&gt;%
+  select(Description,counts)%&gt;%
+  top_n(20)</code></pre>
+<pre><code>## `summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre><code>## Selecting by counts</code></pre>
+<pre><code>## # A tibble: 20 x 2
+##    Description                              counts
+##    &lt;chr&gt;                                     &lt;int&gt;
+##  1 SUB_CK LOW RISE TRUNK 3PK XWN               181
+##  2 (CO)AE KARIMA CUT OUT OP-SD-SS18            108
+##  3 NORTH SHORE TOP SD                          102
+##  4 AE STRAPPY BACK ONE PC BASIC SD SS18         94
+##  5 (CO/DL/PIN)AE ONE PIECE SMOCKED SD-SS18      78
+##  6 MAGIC IN THE AIR TOP SD                      75
+##  7 (CO/MC)AE LIGHTLY LINED MACM-TP-SD-SS18      71
+##  8 (CO) AE BP CUT OUT OP-PR-SS18                70
+##  9 CROSSING PATH ONE PIECE SD                   69
+## 10 163108 C-CROS HIWAIST BIKINI 2ZUO SD VSS     56
+## 11 PKBKNI 17165 RUCHD MINI BIKI 2ZUO SD VSS     56
+## 12 STEADY ROCKIN BOTTOM PR                      56
+## 13 (CPP/F)GRAPHIC FLAIR MIX W                   54
+## 14 E ESS END+ LSUT AF BLACKFL                   54
+## 15 EASY BREEZY BOTTOM PR                        53
+## 16 P SPORTS LOGO MDLT AF BLACK/PINKFL           53
+## 17 STEADY ROCKIN TOP PR                         53
+## 18 E END+ MEDALIST 1PC AF BLK(AF)FL             52
+## 19 P GALA LOGO TSRP MSBK JF BLACK/PINKJG        52
+## 20 (DL/MC/PIN)AE CB MCRM DBL LND OP-PR-SS18     51</code></pre>
+<p>It is clear that certain names stand out such as “BIKINI”,“TOP”,"“BOTTOM,”SPORTS“,”SD“. We will create a feature to recognize these patterns. What we will do is if the word”BIKINI" appears in the description, the new column, “description_feature” will carry “bikini”. We will do this to all the salient words we came across here. However, this feature could correlate with the “Gender” column, but we will nevertheless have this feature.</p>
+<pre class="r"><code># length(unique(full$Module))
+
+
+full&lt;-full%&gt;%
+  mutate(description_feature=ifelse(grepl(&quot;BIKINI&quot;,Description),&quot;bikini&quot;,ifelse(grepl(&quot;TOP&quot;,Description),&quot;top&quot;,ifelse(grepl(&quot;BOTTOM&quot;,Description),&quot;bottom&quot;,ifelse(grepl(&quot;SPORTS&quot;,Description),&quot;sports&quot;,ifelse(grepl(&quot;SD&quot;,Description),&quot;sd&quot;,&quot;other&quot;))))))
+
+
+
+table(full$description_feature)%&gt;%data.frame()%&gt;%
+  ggplot(aes(x=reorder(Var1,-Freq),Freq, label = Freq))+
+  geom_bar(stat = &quot;identity&quot;, fill = &quot;#FF9933&quot;,color=&quot;black&quot;)+
+  labs(title = &quot;Visual 7: The counts in newly created description column&quot;,
+       x = &quot;Column names&quot;)+
+  geom_text(size = 3, position = position_dodge(width = 1),vjust = -0.5, size = 2)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+<p><br></p>
+<p>we will look at the like item column too in order to create a more meaningful column.</p>
+<pre class="r"><code># length(unique(full$Module))
+
+
+full%&gt;%
+  group_by(l_i)%&gt;%
+  summarize(counts=n())%&gt;%
+  ungroup()%&gt;%
+  mutate(`total observations` = sum(counts),
+         percentage = (counts/`total observations`)*100)%&gt;%
+  arrange(desc(counts))%&gt;%
+  select(l_i,percentage)%&gt;%
+  top_n(10)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    l_i   percentage
+##    &lt;chr&gt;      &lt;dbl&gt;
+##  1 10         41.6 
+##  2 20         17.7 
+##  3 30          9.26
+##  4 40          5.90
+##  5 50          4.39
+##  6 60          2.80
+##  7 70          2.54
+##  8 100         2.13
+##  9 80          1.92
+## 10 120         1.67</code></pre>
+<p>In the line item (l_i) column it is clear that 41% of observations belong to a certain line item. The top 5 line items contribute to arround 75% of the line items. Therefore it makes a lot of sense to create a new feature here to identify the major line items. Here, we will create a seperate feature to identify the top 5 characteristics in the line item column.</p>
+<pre class="r"><code>full&lt;-full%&gt;%mutate(line_item2 = ifelse(l_i==&quot;10&quot;,&quot;10&quot;,ifelse(l_i==&quot;20&quot;,&quot;20&quot;,ifelse(l_i==&quot;30&quot;,&quot;30&quot;,ifelse(l_i==&quot;40&quot;,&quot;40&quot;,ifelse(l_i==&quot;50&quot;,&quot;50&quot;,&quot;other&quot;))))))</code></pre>
+<p><br></p>
+<div id="extracting-the-day-of-the-week" class="section level3">
+<h3>Extracting the day of the Week</h3>
+<p>The date variable as it is does not help us to run a regression. We need to at least extract the day of the week in order to run a proper analysis. We will go ahead and extract the date.</p>
+<pre class="r"><code>full&lt;-full%&gt;%mutate(day_of_week = weekdays(Date))
+
+
+table(full$day_of_week)%&gt;%data.frame()%&gt;%
+  ggplot(aes(x=reorder(Var1,-Freq),Freq, label = Freq))+
+  geom_bar(stat = &quot;identity&quot;, fill = &quot;#FF9933&quot;,color=&quot;black&quot;)+
+  labs(title = &quot;Visual 8: The counts of Weekdays&quot;,
+       x = &quot;Column names&quot;)+
+  geom_text(size = 3, position = position_dodge(width = 1),vjust = -0.5, size = 2)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p><br></p>
+</div>
+</div>
+</div>
+<div id="f.-creating-training-and-test-datasets" class="section level1">
+<h1>F. Creating training and test datasets</h1>
+<p>Now that we have created a complete cleaned dataset, we will move on to splitting training and testing datasets. The purpose of creating training and test datasets is that we want to make sure the predictions we are generating are well generalized (Goodfellow et al., 2016). The prediction results on the test datset shows whether the model is overfitting or not. A general practice is to allocate 20-10% of the dataset for testing purpose. Since we have 12,313 records at our disposal, we will plit the dataset as 15% testing and 85% training.</p>
+<pre class="r"><code>train_ind &lt;- sample(seq_len(nrow(full)), size = nrow(full)*0.15)
+
+test &lt;- full[train_ind, ]
+train &lt;- full[-train_ind, ]</code></pre>
+<p>We have divided our dataset into 2 parts. The training dataset has 10467 observations and the testing dataset has 1846 data points.</p>
+<p><br></p>
+</div>
+<div id="g.-training-a-model-on-the-data" class="section level1">
+<h1>G. Training a model on the data</h1>
+<p>As our initial step, we will train a linear model on our training dataset. This is a good initial step before running more complex algorithms. This gives a number of insights into the variables too.</p>
+<pre class="r"><code>linear_model&lt;-lm(log_qty~Order_Qty.+SMV+`Eff_%`+description_feature+line_item2+day_of_week,data=train)
+
+summary(linear_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log_qty ~ Order_Qty. + SMV + `Eff_%` + description_feature + 
+##     line_item2 + day_of_week, data = train)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -7.9449 -0.4159  0.2549  0.7004  3.1272 
+## 
+## Coefficients:
+##                             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                3.031e+00  5.888e-02  51.485  &lt; 2e-16 ***
+## Order_Qty.                 1.981e-04  6.256e-06  31.664  &lt; 2e-16 ***
+## SMV                       -2.052e-02  2.507e-03  -8.186 3.01e-16 ***
+## `Eff_%`                    3.835e-02  5.562e-04  68.951  &lt; 2e-16 ***
+## description_featurebottom -5.505e-02  6.746e-02  -0.816  0.41448    
+## description_featureother   1.206e-01  4.514e-02   2.672  0.00754 ** 
+## description_featuresd      1.731e-01  4.667e-02   3.708  0.00021 ***
+## description_featuresports -2.283e-01  1.039e-01  -2.198  0.02800 *  
+## description_featuretop     1.152e-01  5.385e-02   2.139  0.03249 *  
+## line_item220               3.110e-03  3.001e-02   0.104  0.91746    
+## line_item230               8.595e-03  3.795e-02   0.226  0.82083    
+## line_item240               3.095e-02  4.671e-02   0.662  0.50767    
+## line_item250              -1.662e-01  5.285e-02  -3.145  0.00166 ** 
+## line_item2other           -2.562e-01  2.990e-02  -8.569  &lt; 2e-16 ***
+## day_of_weekMonday          7.768e-02  4.265e-02   1.821  0.06857 .  
+## day_of_weekSaturday        5.390e-02  3.549e-02   1.519  0.12888    
+## day_of_weekSunday         -4.132e-02  3.597e-02  -1.149  0.25061    
+## day_of_weekThursday        3.881e-02  3.384e-02   1.147  0.25149    
+## day_of_weekTuesday         2.631e-01  8.755e-02   3.005  0.00266 ** 
+## day_of_weekWednesday       8.286e-02  3.501e-02   2.366  0.01798 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.075 on 10447 degrees of freedom
+## Multiple R-squared:  0.4586, Adjusted R-squared:  0.4576 
+## F-statistic: 465.7 on 19 and 10447 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>We can see that we have trained a OLS regression on the training dataset. The summary() function provides important information about the model. What variables we chose, the intercept, the p values for variables and the R squared values are shown. We have a R squared value of 0.45.</p>
+<p><br></p>
+</div>
+<div id="h.-apply-different-machine-learning-approaches-and-discuss." class="section level1">
+<h1>H. Apply different machine learning approaches and discuss.</h1>
+<p>We will use a collection of different algorithms in order to predict the</p>
+<pre class="r"><code># run OLS regression
+linear&lt;-lm(log_qty~Order_Qty.+SMV+`Eff_%`+description_feature+line_item2+day_of_week,data=train)
+
+linear$coefficients</code></pre>
+<pre><code>##               (Intercept)                Order_Qty.                       SMV                   `Eff_%` 
+##              3.0313253143              0.0001980898             -0.0205200136              0.0383468649 
+## description_featurebottom  description_featureother     description_featuresd description_featuresports 
+##             -0.0550524527              0.1206217640              0.1730807872             -0.2282593019 
+##    description_featuretop              line_item220              line_item230              line_item240 
+##              0.1151672673              0.0031097439              0.0085951823              0.0309451148 
+##              line_item250           line_item2other         day_of_weekMonday       day_of_weekSaturday 
+##             -0.1662435275             -0.2561882206              0.0776809813              0.0539023228 
+##         day_of_weekSunday       day_of_weekThursday        day_of_weekTuesday      day_of_weekWednesday 
+##             -0.0413226408              0.0388121337              0.2630977594              0.0828573006</code></pre>
+<pre class="r"><code># run a random forest model
+rf&lt;-rpart(log_qty~Order_Qty.+SMV+`Eff_%`+description_feature+line_item2+day_of_week,data=train)
+rf$variable.importance</code></pre>
+<pre><code>##               Eff_%          Order_Qty. description_feature                 SMV         day_of_week 
+##         9109.148640         5613.200791          170.386176           78.945579            1.167029</code></pre>
+<pre class="r"><code># run a gradient boosting model
+gbm_reg&lt;-gbm(log_qty~Order_Qty.+SMV+`Eff_%`+factor(description_feature)+factor(line_item2)+factor(day_of_week),data=train,n.trees = 1500,interaction.depth = 5)</code></pre>
+<pre><code>## Distribution not specified, assuming gaussian ...</code></pre>
+<pre class="r"><code>summary(gbm_reg)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<pre><code>##                                                     var   rel.inf
+## `Eff_%`                                         `Eff_%` 40.395220
+## Order_Qty.                                   Order_Qty. 33.498234
+## SMV                                                 SMV 11.945982
+## factor(day_of_week)                 factor(day_of_week)  7.218883
+## factor(line_item2)                   factor(line_item2)  3.928435
+## factor(description_feature) factor(description_feature)  3.013245</code></pre>
+<p>I have run 3 different models and printed the model importance for the two ensemble models.</p>
+<div id="ols-regression" class="section level3">
+<h3>OLS regression</h3>
+<p>The first model we used is the OLS multiple regression (Tranmer et al.,2008). The idea behind this algorithm is to minimize the sum of squared residuals. In multiple regression, it tries to find a plane that minimizes the sum of squred errors. This is a more insightful method which provides you the significance of each variable, the pvalues of variables and coefficients. This algorithm can only be used for regression problems. However, this method is easily affected by outliers and also not very appropriate in modelling non-linear relationships.</p>
+</div>
+<div id="random-forest" class="section level3">
+<h3>Random Forest</h3>
+<p>The second model we have used is a random forest model (Brieman,l.2001). This is a derivation of decision tree models. The mechanism behind this algorithm is that it creates bootstrapped samples from the training dataset. Then it fits decision tree models on each of the bootstrapped samples. The final model is an average of the predictions of all the models. This is used for classification as well as regression.</p>
+</div>
+<div id="gradient-boosting" class="section level3">
+<h3>Gradient boosting</h3>
+<p>Third model we have used is a gradient boosting model (Allison et al., 2013). This is also a derivation of decision tree models and it is an ensemble method. In boosting, it combines learning algorithms, typically decision trees in series in order to build a stronger model. Therefore it builds decision tree models sequentially rather than individually compared to random forest models.</p>
+<p><br></p>
+</div>
+</div>
+<div id="i.-accuracy-of-each-different-models" class="section level1">
+<h1>I. Accuracy of each different models</h1>
+<p>I intend to use root mean squared error in order to measure the accuracy of the models. The RMSE on the test set gives us a very good understanding of the generalization error. The least model with the RMSE score will be the best model to be used. First we will predict the quantities using the three models that we have trained. It is also important to make sure we get the exponent of the result as we have taken the natural logarithm of the y variable in the training stage.</p>
+<pre class="r"><code>test$pred_lin&lt;-exp(predict(linear,newdata = test))
+test$pred_rf&lt;-exp(predict(rf,newdata = test))
+test$pred_gbm&lt;-exp(predict(gbm_reg,newdata = test,n.trees = 1500,interaction.depth = 5))</code></pre>
+<p>We will next calculate the RMSE values manually. I have visualized the accuracies visually for convenience. <br></p>
+<pre class="r"><code>sqrt(mean((test$Qty.-test$pred_lin)^2))</code></pre>
+<pre><code>## [1] 209.1334</code></pre>
+<pre class="r"><code>sqrt(mean((test$Qty.-test$pred_rf)^2))</code></pre>
+<pre><code>## [1] 194.3597</code></pre>
+<pre class="r"><code>sqrt(mean((test$Qty.-test$pred_gbm)^2))</code></pre>
+<pre><code>## [1] 179.3473</code></pre>
+<pre class="r"><code>a&lt;-data.frame(model=c(&quot;Linear model&quot;,&quot;random forest&quot;,&quot;gradient boosting&quot;),rmse=c(sqrt(mean((test$Qty.-test$pred_lin)^2)),
+                                                                                     sqrt(mean((test$Qty.-test$pred_rf)^2)),
+                                                                                     sqrt(mean((test$Qty.-test$pred_gbm)^2))))
+
+ggplot(a, aes(model,rmse))+geom_bar(stat=&quot;identity&quot;,aes(fill=model))+labs(title=&quot;Visual 8: Model Errors (RMSE)&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-28-1.png" width="672" /></p>
+<p><br></p>
+<p>We can clearly see that the error is highest for the linear model. The random forest comes next with significantly less error. The least error was produced by the gradient boosting model. So out of the tree models we have we choose the gradient boosting model as it has the least out of sample error.</p>
+<p><br></p>
+</div>
+<div id="j.-alternative-ways-of-normalizations-model-building-and-their-performances" class="section level1">
+<h1>j. Alternative ways of normalizations, model building, and their performances</h1>
+<p>There are a number of ways to normalize data. Converting to log scale is one common way data scientists used to normalize data. There are more ways such as converting to Z score (Prihanditya,H.A.2020). For that we only need the mean and standard deviation. This time we will convert our Y variable as well as the efficiency column into a normalized scale and check results</p>
+<p><br></p>
+<pre class="r"><code>m&lt;-mean(full$Qty.)
+sd1&lt;-sd(full$Qty.)
+
+# Convert our two variables into a z score
+full$norm_qty&lt;-(full$Qty.-m)/sd1
+full$norm_eff&lt;-(full$`Eff_%`-mean(full$`Eff_%`))/sd(full$`Eff_%`)
+
+# split train-test again  
+test &lt;- full[train_ind, ]
+train &lt;- full[-train_ind, ]
+
+# train the GBM on the scaled data
+set.seed(1234)
+gbm_reg&lt;-gbm(norm_qty~Order_Qty.+SMV+norm_eff+factor(description_feature)+factor(line_item2)+factor(day_of_week),data=train,n.trees = 1500,interaction.depth = 5)</code></pre>
+<pre><code>## Distribution not specified, assuming gaussian ...</code></pre>
+<pre class="r"><code># Train the GBM on unscaled data
+set.seed(1234)
+gbm_reg2&lt;-gbm(`Qty.`~Order_Qty.+SMV+`Eff_%`+factor(description_feature)+factor(line_item2)+factor(day_of_week),data=train,n.trees = 1500,interaction.depth = 5)</code></pre>
+<pre><code>## Distribution not specified, assuming gaussian ...</code></pre>
+<pre class="r"><code># predict the scaled model
+set.seed(1234)
+test$gbm_norm&lt;-predict(gbm_reg,newdata = test,n.trees = 1500,interaction.depth = 5)
+
+# predict the unscaled model
+set.seed(1234)
+test$gbm_orig&lt;-predict(gbm_reg2,newdata = test,n.trees = 1500,interaction.depth = 5)
+
+# fix the scales to reflect real values
+test$gbm_norm2&lt;-(test$gbm_norm*sd1)+m
+
+# error of the scaled model
+sqrt(mean((test$Qty.-test$gbm_norm2)^2))</code></pre>
+<pre><code>## [1] 162.5731</code></pre>
+<pre class="r"><code># error of the unscaled model
+sqrt(mean((test$Qty.-test$gbm_orig)^2))</code></pre>
+<pre><code>## [1] 162.7608</code></pre>
+<p>We will use a gradient boosting model to check how effective is the new normalization method. What we do is we are using a gradient boosting model to see if the z score converted model provides a lower amount of RMSE. Once we predict on the unseen data, we convert the scale back to real numbers and check the RMSE. Parallelly we run another model which does not contain any column with scaled values.</p>
+<p>The observation is that the model with scaling is slightly better than the model run on the raw values. This is because the RMSE value is less in the scaled model than any other model we have run. So alternatively this method provides better results. The scaling exercise tells us that putting our data in one scale is very important and it increases the effectiveness of algorithms albeit small.</p>
+<p>When it comes to alternative ways of model building, we have explored 3 common algorithms already. We can use other regression algorithms such as neural networks, XgBoost, KNN, decision trees etc. Therefore we have explored a good number of algorithms already.</p>
+</div>
+<div id="k.-patterns-identified-and-their-visualizations" class="section level1">
+<h1>K. Patterns identified and their visualizations</h1>
+<p>In this whole article, I have identified a number of patterns in the dataset. Along the way we have explored the data and we have done a number of things to identify the patterns.</p>
+<ol style="list-style-type: decimal">
+<li>Explored the unique pattern of NA values</li>
+<li>Distribution of the Y variable and its boxplots relative to Gender</li>
+<li>Different categorical features and their levels</li>
+<li>The linear regression to identify the P values of the variables and their relationship with the target variable.</li>
+</ol>
+<p>In addition to these, correlation plot is a good way to identify the inter-relationships between variables.</p>
+<pre class="r"><code>library(corrplot)
+library(psych)
+par(mar=c(1,1,1,1))
+# corPlot(full[columns_n], cex = 0.8)
+
+
+corrplot(cor(full[columns_n]),        # Correlation matrix
+         method = c(&quot;number&quot;), # Correlation plot method
+         tl.col = &quot;black&quot;, # Labels color
+         bg = &quot;white&quot;,     # Background color
+         title = &quot;Visual 9: Correlation plot of Numerical variables&quot;,       # Main title
+         col = NULL,
+         addCoefasPercent = TRUE,
+         tl.cex = 0.8,
+         mar = c(2,0 , 3, 2),)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-30-1.png" width="672" /></p>
+<p>Correlation plot gives you a very detailed understanding about the interrelationship between variables. Correlation coefficient shows the degree of linear association between two variables (Taylor,R. 1990). The correlation ranging from -100 to +100 represent the strength of the correlation. It shows that Qty. and Order Qty strongly correlate with our Y variable. This becomes evident as the variables that have turned out to be the most relevant also the ones that have a high correlation with the Y variable. In fact there are no variables that have a strong negative correlation either with the Y variable or any other variable.</p>
+<p><br></p>
+</div>
+<div id="lm.-describe-a-detailed-comparative-analysis-between-the-scaling-machine-learning-approaches-strengths-limitations-uniqueness.-comparative-analysis-should-be-in-relation-to-integration-transformation-visualization-and-data-mining" class="section level1">
+<h1>l/M. Describe a detailed comparative analysis between the scaling, Machine Learning approaches – strengths, limitations, uniqueness. Comparative analysis should be in relation to integration transformation, visualization and data mining</h1>
+<p>The first machine learning model we have used is OLS multiple regression. This was our first approach in order to develop a baseline model. This helps us to benchmark other methods too. it aims to minimize the sum of squared residuals. OLS regression provides the significance of the variables, the pvalues of variables and coefficients. This algorithm cannot be used for classification problems. One disadvantage is it is affected by outliers. Non-linear relationships cannot be properly modelled. Also often the accuracy is less compared to newer machine learning methods.</p>
+<p>Random forest uses decision tree models as its base model. The algorithm is that it creates bootstrapped samples from the training dataset and fits decision tree models on all the bootstrapped samples. The final model puts together the predictions of all the models. This method can be used in classification as well as regression. This can accommodate non-linear relationships too. One disadvantage is that if we are not careful, the model could easily overfit.</p>
+<p>Gradient boosting model is also a derivation of decision tree models. It is an ensemble method in that it puts together the predictions of a number of decision trees. However, the tree growth here happens sequentially rather than individually compared to random forest models. This is a very powerful algorithm used in many novel problems. Again, this has the ability to overfit if we are not careful. The method is comparatively better performing in outlier situations. GBM can accommodate non-linear relationships. GBM can also be used in classification problems. Sometimes, if you want to further improve the model, there are a number of hyperparameters you could optimize.</p>
+<p>In our case it is very important to know our utility. We are using the model for prediction and not for explanation necessarily. Therefore a linear model is not the best model to use. A GBM is considered a black box as it is not the most transparent model. But it is very appropriate in a prediction problem. So the most appropriate model is the GBM and the random forest and a linear model is only appropriate as a baseline model to explain the data.</p>
+<div id="z-score-scalling" class="section level3">
+<h3>Z score scalling</h3>
+<pre class="r"><code>ggplot(full, aes(norm_qty))+
+  geom_density(fill=&quot;#FF9933&quot;, alpha=0.8)+
+  labs(title=&quot;Visual 10: Qty&#39;s z score Distribution&quot;,
+       x = &quot;Z scale converted Quantity column&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-31-1.png" width="672" /></p>
+<p>Scaling is changing the range of our data so that the machine learing models are not affected by extreme lengths of the variables. We have used two ways of scaling. First, we used natural log conversion. This is a quich method to convert your variables into a linear scale from an exponential scale. The limitation is that if you have any negative values, you are not able to convert those values into log values and needs further treatment. The second method we used was the conversion to Z score. We used mean and standard deviation of the variable to achieve that. For example, if a z score is 2 it means that the observation is 2 standard deviations away from the mean. This provided better results albeit marginally compared to log conversion. No need to treat for negative values here as it clearly captures them too. Therefore we prefer z-score conversion compared to log conversion.</p>
+<p><br></p>
+</div>
+</div>
+<div id="n.-provide-a-brief-discussion-about-the-knowledge-gained" class="section level1">
+<h1>N. Provide a brief discussion about the knowledge gained</h1>
+<ol style="list-style-type: decimal">
+<li><p>First, I gained a lot of knowledge about how a data science project is run on the ground. The data is not clean all the time and it needs to do extensive data cleaning in order to get the data in an analyzable format.</p></li>
+<li><p>It is very important to have skills in sequential data reading. Ways to not just one file read but a number of files are read in one go.</p></li>
+<li><p>Visualizations can tell a very good story. There are a lot of information that can be conveyed through a visualization rather than a number. For example, in the outlier detection, the magnitude of the problem was very clear with the visualizations.</p></li>
+<li><p>Scaling has the capacity to improve model performance.</p></li>
+<li><p>Not just the powerful algorithms but the quality of the data matters.</p></li>
+<li><p>I came across some very exceptional outliers. If I had not cleaned the outliers the model would have been strongly affected by the outliers.</p></li>
+<li><p>Different algorithms perform differently and their utility is different. We can use an ensemble model if the task is to predict and not necessarily explain.</p></li>
+</ol>
+<p><br></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<p>Alarsan, F.I. and Younes, M., 2019. Analysis and classification of heart diseases using heartbeat features and machine learning algorithms. Journal of Big Data, 6(1), pp.1-15.</p>
+<p>Al Shalabi, L., Shaaban, Z. and Kasasbeh, B., 2006. Data mining: A preprocessing engine. Journal of Computer Science, 2(9), pp.735-739.</p>
+<p>Breiman, L., 2001. Random forests. Machine learning, 45(1), pp.5-32.</p>
+<p>Goodfellow, I., Bengio, Y. and Courville, A., 2016. Machine learning basics. Deep learning, 1(7), pp.98-164.</p>
+<p>Gupta, Y., 2018. Selection of important features and predicting wine quality using machine learning techniques. Procedia Computer Science, 125, pp.305-312.</p>
+<p>Jo, J.M., 2019. Effectiveness of normalization pre-processing of big data to the machine learning performance. The Journal of the Korea institute of electronic communication sciences, 14(3), pp.547-552.</p>
+<p>Natekin, A. and Knoll, A., 2013. Gradient boosting machines, a tutorial. Frontiers in neurorobotics, 7, p.21.</p>
+<p>Prihanditya, H.A., 2020. The implementation of z-score normalization and boosting techniques to increase accuracy of c4. 5 algorithm in diagnosing chronic kidney disease. Journal of Soft Computing Exploration, 1(1), pp.63-69.</p>
+<p>Robnik-Šikonja, M., 2004, September. Improving random forests. In European conference on machine learning (pp. 359-370). Springer, Berlin, Heidelberg.</p>
+<p>Seger, C., 2018. An investigation of categorical variable encoding techniques in machine learning: binary versus one-hot and feature hashing.</p>
+<p>Singh, A., Thakur, N. and Sharma, A., 2016, March. A review of supervised machine learning algorithms. In 2016 3rd International Conference on Computing for Sustainable Global Development (INDIACom) (pp. 1310-1315). Ieee.</p>
+<p>Taylor, R., 1990. Interpretation of the correlation coefficient: a basic review. Journal of diagnostic medical sonography, 6(1), pp.35-39.</p>
+<p>Tranmer, M. and Elliot, M., 2008. Multiple linear regression. The Cathie Marsh Centre for Census and Survey Research (CCSR), 5(5), pp.1-5.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

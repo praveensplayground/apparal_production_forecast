@@ -1,0 +1,12 @@
+---
+title: "about"
+---
+
+## Introduction
+
+The goal is to forecast the production. We are given two data sources which are the “plan” folder and the “production quantities” folder. There is no specified forecasting horizon specified therefore it is not necessary to forecast forward. As the problem suggests, this is a supervised learning problem as we will likely have labeled datasets for us to learn patterns and forecast. This is also likely going to be a regression problem. The Y variable is going to be a continuous variable and not a categorical variable. We have been given the definition of few X variables but we have not been specified a Y variable.
+
+
+## Executive Summary
+
+The goal of this study is to predict the production quantities for an apparel manufacturer. We have run a multinomial OLS regression, random forest model and a gradient boosting model (GBM) in order to predict the production quantities. We have done data cleaning, visualizations feature engineering, scaling in order to create an appropriate dataset for model training. We used root mean squared error (RMSE) of the test set in order to decide the best model. The GBM model provides the least RMSE thus proving to be the most appropriate model. 
